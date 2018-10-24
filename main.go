@@ -191,6 +191,15 @@ func parsePullRequest(conf *config, action string, pr *github.PullRequestEvent) 
 						commitSHA:        commitSHA,
 					}
 					builds = append(builds, build)
+				case "mender-image-tests":
+					build := buildOptions{
+						pr:               strconv.Itoa(pr.GetNumber()),
+						repo:             repo,
+						baseBranch:       baseBranch,
+						commitSHA:        commitSHA,
+					}
+					builds = append(builds, build)
+
 
 				default:
 					continue
