@@ -55,7 +55,8 @@ func getConfig() (*config, error) {
 	// if no env. variable is set, this is the default repo watch list
 	defaultWatchRepositories :=
 		[]string{
-			"mender-convert"}
+			"mender-convert",
+			"mender-image-tests"}
 
 	watchRepositories := os.Getenv("WATCH_REPOS")
 
@@ -224,12 +225,19 @@ func triggerBuild(conf *config, build *buildOptions) error {
 	if err != nil {
 		return nil
 	}
+	readHead := "pull/" + build.pr + "/head"
 
 	buildParameter := url.Values{}
 
 	// set the rest of the jenkins build parameters
-	buildParameter.Add("MENDER_IMAGE_TESTS_REV", "master")
-	buildParameter.Add("MENDER_CONVERT_REV", "master")
+	if strings.Compare ("mender-convert", build.repo) == 0 {
+		buildParameter.Add("MENDER_IMAGE_TESTS_REV", "master")
+		buildParameter.Add("MENDER_CONVERT_REV", readHead)
+	}
+	if strings.Compare ("mender-image-tests", build.repo) == 0 {
+		buildParameter.Add("MENDER_IMAGE_TESTS_REV", readHead)
+		buildParameter.Add("MENDER_CONVERT_REV", "master")
+	}
 
 	log.Infof("Starting build: %s", spew.Sdump(buildParameter))
 	return jenkins.Build(job, buildParameter)
